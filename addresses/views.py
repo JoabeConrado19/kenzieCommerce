@@ -13,3 +13,4 @@ class AddressView(ListCreateAPIView, UpdateAPIView, DestroyAPIView):
 
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
+
