@@ -1,4 +1,5 @@
 from django.db import models
+from users.models import User
 
 
 class Product(models.Model):
@@ -8,5 +9,4 @@ class Product(models.Model):
     price = models.FloatField()
     stock = models.IntegerField()
     available = models.BooleanField(default=True)
-
-    # user = models.ManyToManyField("users.User", related_name="product")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
