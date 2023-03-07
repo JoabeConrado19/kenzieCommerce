@@ -10,7 +10,7 @@ from .permissions import IsAdmOrAccountOwner
 class AddressView(ListCreateAPIView, UpdateAPIView, DestroyAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated, IsAdmOrAccountOwner]
-
+    pagination_class = None
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
 
