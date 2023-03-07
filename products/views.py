@@ -4,12 +4,13 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.generics import  ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from .models import Product
 from .serializer import ProductSerializer
+from .permissions import IsAdmOrSeller
 
 # Create your views here.
 
 class ProductView(ListCreateAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdmOrSeller]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     def get_queryset(self):
@@ -27,7 +28,7 @@ class ProductView(ListCreateAPIView):
 
 class ProductDetailView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdmOrSeller]
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
