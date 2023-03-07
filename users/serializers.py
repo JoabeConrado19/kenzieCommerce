@@ -33,6 +33,7 @@ class UserSerializer(serializers.ModelSerializer):
             "cpf",
             "is_superuser",
             "is_seller",
+            "username"
         ]
-        read_only = ["username"]
+
         extra_kwargs = {"password": {"write_only": True}}
