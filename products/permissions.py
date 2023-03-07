@@ -8,5 +8,5 @@ class IsAdmOrSeller(permissions.BasePermission):
             return True
         if request.user.is_authenticated and request.user.is_superuser:
             return True
-        if request.user.is_authenticated and request.user.is_seller:
+        if request.user.is_seller:
             return True

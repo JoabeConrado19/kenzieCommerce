@@ -25,6 +25,8 @@ class ProductView(ListCreateAPIView):
         if id:
             queryset = queryset.filter(id=id)
         return queryset
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 class ProductDetailView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
