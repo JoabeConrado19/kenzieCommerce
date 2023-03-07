@@ -13,4 +13,3 @@ class AddressView(ListCreateAPIView, UpdateAPIView, DestroyAPIView):
     pagination_class = None
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
-
