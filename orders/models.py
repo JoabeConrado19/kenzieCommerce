@@ -20,7 +20,8 @@ class Order(models.Model):
         default="pedido_realizado"
     )
     buyed_at = models.DateTimeField(default=timezone.now)
-    products = models.ManyToManyField("products.Product", through="OrderedProduct")
+    totalPrice = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    totalQuantity = models.PositiveIntegerField(default=0)
 
 class OrderedProduct(models.Model):
     order = models.ForeignKey(
@@ -29,9 +30,9 @@ class OrderedProduct(models.Model):
         related_name="ordered_products"
     )
     product = models.ForeignKey(
-        "shopping_carts.ShoppingCartItem", 
+        "products.Product", 
         on_delete=models.CASCADE, 
         related_name="ordered_products"
     )
-    totalPrice = models.DecimalField(max_digits=8, decimal_places=2)
-    totalQuantity = models.PositiveIntegerField()
+
+
