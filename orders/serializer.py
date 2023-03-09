@@ -6,6 +6,8 @@ class OrderedProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderedProduct
         fields = "__all__"
+        extra_kwargs = {"order": {"read_only": True}}
+
 
 class OrderSerializer(serializers.ModelSerializer):
     ordered_products = OrderedProductSerializer(many=True)
