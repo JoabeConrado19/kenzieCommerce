@@ -81,6 +81,7 @@ class OrderView(generics.ListCreateAPIView, generics.DestroyAPIView):
                         "category": item.product.category,
                         "price": item.product.price,
                         "quantity": item.quantity,
+                        "buyer": item.cart.user.id,
                     }
                 )
             ordered_products_serializer = OrderedProductSerializer(

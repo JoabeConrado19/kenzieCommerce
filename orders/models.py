@@ -33,3 +33,4 @@ class OrderedProduct(models.Model):
     category = models.CharField(max_length=100)
     price = models.FloatField()
     quantity = models.PositiveIntegerField(default=1)
+    buyer = models.IntegerField()
