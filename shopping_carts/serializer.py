@@ -16,6 +16,7 @@ class ShoppingCartItemSerializer(serializers.ModelSerializer):
             "quantity",
         ]
 
+
 class ShoppingCartSerializer(serializers.ModelSerializer):
     items = ShoppingCartItemSerializer(many=True, read_only=True)
 
@@ -32,9 +33,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         else:
             product = Product.objects.get(id=product_id)
             cart_item = ShoppingCartItem.objects.create(
-                cart=shopping_cart, 
-                product=product, 
-                quantity=int(quantity)
+                cart=shopping_cart, product=product, quantity=int(quantity)
             )
 
         return shopping_cart
@@ -47,4 +46,3 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
             "items",
         ]
         read_only_fields = ["user", "items"]
-
