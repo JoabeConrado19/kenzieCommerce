@@ -40,13 +40,13 @@ class OrderView(generics.ListCreateAPIView, generics.DestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_seller:
+        if user.is_seller or user.is_superuser:
             return Order.objects.filter(user=user)
         return Order.objects.none()
 
     def get(self, request, *args, **kwargs):
         user = self.request.user
-        if user.is_seller:
+        if user.is_seller or user.is_superuser:
             orders = self.get_queryset()
             serializer = self.serializer_class(orders, many=True)
             return Response(serializer.data)
@@ -67,11 +67,6 @@ class OrderView(generics.ListCreateAPIView, generics.DestroyAPIView):
             cart_items = cart.items.filter(product__in=seller_products)
             total_price = sum(item.product.price * item.quantity for item in cart_items)
             total_quantity = sum(item.quantity for item in cart_items)
-            order = Order.objects.create(
-                user=seller,
-                totalPrice=total_price,
-                totalQuantity=total_quantity,
-            )
             ordered_products_data = []
             for item in cart_items:
                 ordered_products_data.append(
@@ -87,7 +82,13 @@ class OrderView(generics.ListCreateAPIView, generics.DestroyAPIView):
             ordered_products_serializer = OrderedProductSerializer(
                 data=ordered_products_data, many=True
             )
+
             if ordered_products_serializer.is_valid():
+                order = Order.objects.create(
+                    user=seller,
+                    totalPrice=total_price,
+                    totalQuantity=total_quantity,
+                )
                 ordered_products_serializer.save(order=order)
                 cart.items.filter(product__in=seller_products).delete()
             else:
