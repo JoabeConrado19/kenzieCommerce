@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
-from .serializer import OrderSerializer, OrderedProductSerializer
-from .models import Order
+from .serializer import OrderSerializer, OrderedProductSerializer, OrderConfirmed
+from .models import Order, OrderedProduct
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
@@ -10,30 +10,7 @@ from users.models import User
 from rest_framework.response import Response
 
 
-class OrderView(generics.ListCreateAPIView, generics.DestroyAPIView):
-    serializer_class = OrderSerializer
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.is_seller:
-            return Order.objects.filter(user=user)
-        return Order.objects.none()
-
-    def get(self, request, *args, **kwargs):
-        user = self.request.user
-        if user.is_seller:
-            orders = self.get_queryset()
-            serializer = self.serializer_class(orders, many=True)
-            return Response(serializer.data)
-        return Response(
-            {"message": "Usuário não autorizado para acessar os pedidos"},
-            status=status.HTTP_401_UNAUTHORIZED,
-        )
-
-
-class OrderView(generics.ListCreateAPIView, generics.DestroyAPIView):
+class OrderView(generics.ListCreateAPIView):
     serializer_class = OrderSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -97,3 +74,49 @@ class OrderView(generics.ListCreateAPIView, generics.DestroyAPIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
         return Response({"message": "Pedidos criados com sucesso"})
+
+
+class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_seller or user.is_superuser:
+            return Order.objects.filter(user=user)
+        return Order.objects.none()
+
+    def update(self, request, *args, **kwargs):
+        user = self.request.user
+
+        if not user.is_seller or user.is_superuser:
+            return Response(
+                {"message": "Usuário não autorizado para atualizar o status do pedido"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        order = self.get_object()
+        serializer = OrderConfirmed(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        confirmed = serializer.data["confirmed_order"]
+
+        if confirmed:
+            order.status = "Pedido em Andamento"
+            products = OrderedProduct.objects.filter(order=order.id)
+
+            for item in products:
+                quantity = item.quantity
+                product_stock = Product.objects.get(id=item.product_id)
+                product_stock.stock -= quantity
+                if product_stock.stock == 0:
+                    product_stock.available = False
+
+                product_stock.save()
+
+            order.save()
+
+        else:
+            order.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response({"message": "Pedido Cofirmado"})
