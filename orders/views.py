@@ -87,36 +87,52 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Order.objects.none()
 
     def update(self, request, *args, **kwargs):
+        import ipdb
+
         user = self.request.user
+        if user.is_seller:
+            order = self.get_object()
+            serializer = OrderConfirmed(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            confirmed = serializer.data["confirmed_order"]
+            if confirmed:
+                order.status = "Pedido em Andamento"
+                products = OrderedProduct.objects.filter(order=order.id)
 
-        if not user.is_seller or user.is_superuser:
-            return Response(
-                {"message": "Usuário não autorizado para atualizar o status do pedido"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+                for item in products:
+                    quantity = item.quantity
+                    product_stock = Product.objects.get(id=item.product_id)
+                    product_stock.stock -= quantity
+                    if product_stock.stock == 0:
+                        product_stock.available = False
 
-        order = self.get_object()
-        serializer = OrderConfirmed(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        confirmed = serializer.data["confirmed_order"]
+                    product_stock.save()
 
-        if confirmed:
-            order.status = "Pedido em Andamento"
-            products = OrderedProduct.objects.filter(order=order.id)
+                order.save()
 
-            for item in products:
-                quantity = item.quantity
-                product_stock = Product.objects.get(id=item.product_id)
-                product_stock.stock -= quantity
-                if product_stock.stock == 0:
-                    product_stock.available = False
+                return Response({"message": "Pedido Cofirmado"})
 
-                product_stock.save()
+            else:
+                order.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
 
+        if not user.is_seller:
+            order_id = self.kwargs["pk"]
+            order = Order.objects.get(id=order_id)
+            serializer = OrderConfirmed(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            if order.status == "pedido_realizado":
+                return Response(
+                    {"message": "Seu pedido está em aprovação"},
+                    status=status.HTTP_401_UNAUTHORIZED,
+                )
+            if order.status == "Entregue":
+                return Response(
+                    {"message": "A entrega já foi confirmada para esse pedido"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            order.status = "Entregue"
             order.save()
 
-        else:
-            order.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        return Response({"message": "Pedido Cofirmado"})
+            return Response({"message": "Entrega confirmada"})

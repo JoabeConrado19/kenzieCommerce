@@ -105,11 +105,12 @@ DATABASES = {
         "PORT": 5432,
     }
 }
-DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL:
     db_from_env = dj_database_url.config(
-        default=DATABASE_URL, conn_max_age=500, ssl_require=True)
-    DATABASES['default'].update(db_from_env)
+        default=DATABASE_URL, conn_max_age=500, ssl_require=True
+    )
+    DATABASES["default"].update(db_from_env)
     DEBUG = False
 if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
@@ -169,8 +170,8 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
 CORS_ORIGIN_ALLOW_ALL = True
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, "static"),
 ]
