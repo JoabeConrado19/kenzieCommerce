@@ -35,5 +35,4 @@ class UserSerializer(serializers.ModelSerializer):
             "is_seller",
             "username",
         ]
-
         extra_kwargs = {"password": {"write_only": True}}
