@@ -136,3 +136,15 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
             order.save()
 
             return Response({"message": "Entrega confirmada"})
+
+class DeliveredProductsView(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_seller or user.is_superuser:
+            return Order.objects.filter(user_id=user, status="Entregue")
+        return Order.objects.none()
+
