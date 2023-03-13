@@ -14,10 +14,11 @@ class ShoppingCartsView(ListCreateAPIView, DestroyAPIView):
     pagination_class = None
     queryset = ShoppingCarts.objects.all()
     serializer_class = ShoppingCartSerializer
+
     def destroy(self, request, *args, **kwargs):
         user = request.user
         shopping_cart = get_object_or_404(ShoppingCarts, user=user)
-        product_id = kwargs.get('pk')
+        product_id = kwargs.get("pk")
 
         if product_id:
             cart_item = shopping_cart.items.filter(product__id=product_id).first()
