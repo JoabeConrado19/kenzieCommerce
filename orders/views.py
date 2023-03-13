@@ -8,6 +8,9 @@ from shopping_carts.models import ShoppingCarts
 from products.models import Product
 from users.models import User
 from rest_framework.response import Response
+from django.core.mail import send_mail
+import os
+import dotenv
 
 
 class OrderView(generics.ListCreateAPIView):
@@ -73,6 +76,12 @@ class OrderView(generics.ListCreateAPIView):
                     ordered_products_serializer.errors,
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+        send_mail(
+            "Atualização de status de pedido",
+            "Pedido Realizado",
+            os.getenv("EMAIL_HOST_USER"),
+            [user.email],
+        )
         return Response({"message": "Pedidos criados com sucesso"})
 
 
@@ -87,6 +96,7 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Order.objects.none()
 
     def update(self, request, *args, **kwargs):
+        user = self.request.user
         order_id = self.kwargs["pk"]
         order = Order.objects.get(id=order_id)
         serializer = OrderConfirmed(data=request.data)
@@ -96,7 +106,6 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
             if confirmed:
                 order.status = "Pedido em Andamento"
                 products = OrderedProduct.objects.filter(order=order.id)
-
                 for item in products:
                     quantity = item.quantity
                     product_stock = Product.objects.get(id=item.product_id)
@@ -107,6 +116,12 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
                     product_stock.save()
 
                 order.save()
+                send_mail(
+                    "Atualização de status de pedido",
+                    "Pedido em Andamento",
+                    os.getenv("EMAIL_HOST_USER"),
+                    [user.email],
+                )
 
                 return Response({"message": "Pedido Cofirmado"})
 
@@ -117,8 +132,14 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
         if order.status == "Pedido em Andamento":
             order.status = "Entregue"
             order.save()
+            send_mail(
+                "Atualização de status de pedido",
+                "Pedido entregue",
+                os.getenv("EMAIL_HOST_USER"),
+                [user.email],
+            )
             return Response({"message": "Entrega confirmada"})
-            
+
         if order.status == "Entregue":
             return Response(
                 {"message": "A entrega já foi confirmada para esse pedido"},
@@ -142,16 +163,17 @@ class DeliveredProductsView(generics.ListAPIView):
             return Order.objects.filter(user_id=user, status="Entregue")
         return Order.objects.none()
 
+
 class BuyedProductsView(generics.ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = OrderSerializer
+
     def get_queryset(self):
         user = self.request.user
-        
+
         ordered = OrderedProduct.objects.filter(buyer=user.id)
         orders = []
         for order in ordered:
             orders.append(order.order)
         return orders
-        
