@@ -87,14 +87,12 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Order.objects.none()
 
     def update(self, request, *args, **kwargs):
-        import ipdb
-
-        user = self.request.user
-        if user.is_seller:
-            order = self.get_object()
-            serializer = OrderConfirmed(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            confirmed = serializer.data["confirmed_order"]
+        order_id = self.kwargs["pk"]
+        order = Order.objects.get(id=order_id)
+        serializer = OrderConfirmed(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        confirmed = serializer.data["confirmed_order"]
+        if order.status == "pedido_realizado" and order.user_id == request.user.id:
             if confirmed:
                 order.status = "Pedido em Andamento"
                 products = OrderedProduct.objects.filter(order=order.id)
@@ -116,23 +114,19 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
                 order.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
 
-        if not user.is_seller:
-            order_id = self.kwargs["pk"]
-            order = Order.objects.get(id=order_id)
-            serializer = OrderConfirmed(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            if order.status == "pedido_realizado":
-                return Response(
-                    {"message": "Seu pedido está em aprovação"},
-                    status=status.HTTP_401_UNAUTHORIZED,
-                )
-            if order.status == "Entregue":
-                return Response(
-                    {"message": "A entrega já foi confirmada para esse pedido"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
+        if order.status == "Pedido em Andamento":
             order.status = "Entregue"
             order.save()
-
             return Response({"message": "Entrega confirmada"})
+            
+        if order.status == "Entregue":
+            return Response(
+                {"message": "A entrega já foi confirmada para esse pedido"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if order.status == "pedido_realizado" and order.user_id != request.user.id:
+            return Response(
+                {"message": "Seu pedido está em aprovação"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
