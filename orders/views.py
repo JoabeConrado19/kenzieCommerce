@@ -142,3 +142,16 @@ class DeliveredProductsView(generics.ListAPIView):
             return Order.objects.filter(user_id=user, status="Entregue")
         return Order.objects.none()
 
+class BuyedProductsView(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializer
+    def get_queryset(self):
+        user = self.request.user
+        
+        ordered = OrderedProduct.objects.filter(buyer=user.id)
+        orders = []
+        for order in ordered:
+            orders.append(order.order)
+        return orders
+        
