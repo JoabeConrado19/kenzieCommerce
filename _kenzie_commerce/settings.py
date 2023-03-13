@@ -32,13 +32,14 @@ SECRET_KEY = os.getenv("SECRET_KEY", get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["kenziecommerce-production.up.railway.app",  "0.0.0.0"]
 
 
 # Application definition
 
 THIRD_PARTY_APPS = [
     "rest_framework",
+    "corsheaders",
 ]
 
 MY_APPS = [
@@ -69,6 +70,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "_kenzie_commerce.urls"
@@ -103,6 +105,10 @@ DATABASES = {
         "PASSWORD": os.getenv("DB_PASSWORD"),
         "HOST": "127.0.0.1",
         "PORT": 5432,
+    },
+    "other_name":{
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -169,9 +175,15 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=8),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
+
+
 CORS_ORIGIN_ALLOW_ALL = True
+
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
