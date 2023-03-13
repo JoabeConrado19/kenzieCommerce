@@ -8,6 +8,7 @@ from shopping_carts.models import ShoppingCarts
 from products.models import Product
 from users.models import User
 from rest_framework.response import Response
+from django.core.mail import send_mail
 
 
 class OrderView(generics.ListCreateAPIView):
@@ -87,7 +88,6 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Order.objects.none()
 
     def update(self, request, *args, **kwargs):
-        import ipdb
 
         user = self.request.user
         if user.is_seller:
@@ -95,10 +95,16 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
             serializer = OrderConfirmed(data=request.data)
             serializer.is_valid(raise_exception=True)
             confirmed = serializer.data["confirmed_order"]
+            print(user.__dict__)
             if confirmed:
                 order.status = "Pedido em Andamento"
                 products = OrderedProduct.objects.filter(order=order.id)
-
+                send_mail(
+                    "Atualização de status de pedido",
+                    "Pedido em Andamento",
+                    "thiagorodriguessilva1994@hotmail.com",
+                    ["thiagorodriguessilva1994@hotmail.com"],
+                )
                 for item in products:
                     quantity = item.quantity
                     product_stock = Product.objects.get(id=item.product_id)
