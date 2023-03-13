@@ -9,6 +9,8 @@ from products.models import Product
 from users.models import User
 from rest_framework.response import Response
 from django.core.mail import send_mail
+import os
+import dotenv
 
 
 class OrderView(generics.ListCreateAPIView):
@@ -99,12 +101,6 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
             if confirmed:
                 order.status = "Pedido em Andamento"
                 products = OrderedProduct.objects.filter(order=order.id)
-                send_mail(
-                    "Atualização de status de pedido",
-                    "Pedido em Andamento",
-                    "thiagorodriguessilva1994@hotmail.com",
-                    ["thiagorodriguessilva1994@hotmail.com"],
-                )
                 for item in products:
                     quantity = item.quantity
                     product_stock = Product.objects.get(id=item.product_id)
@@ -115,6 +111,12 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
                     product_stock.save()
 
                 order.save()
+                send_mail(
+                    "Atualização de status de pedido",
+                    "Pedido em Andamento",
+                    os.getenv("EMAIL_HOST_USER"),
+                    [user.email],
+                )
 
                 return Response({"message": "Pedido Cofirmado"})
 
@@ -140,5 +142,11 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
 
             order.status = "Entregue"
             order.save()
+            send_mail(
+                "Atualização de status de pedido",
+                "Pedido entregue",
+                os.getenv("EMAIL_HOST_USER"),
+                [user.email],
+            )
 
             return Response({"message": "Entrega confirmada"})
