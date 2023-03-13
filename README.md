@@ -24,6 +24,80 @@
      <br>
 </blockquote>
 <br>
+<h2 align="center">Funcionalidades e níveis de acesso</h2>
+<hr>
+<br>
+<h3>1. Usuários</h3>
+    <blockquote>
+        <br>
+            <p>A api permite o cadastro de usuários, existem três tipos usuários:</p>
+                <ul>
+                    <li>Administrador,</li>
+                    <li>Vendedor,</li>
+                    <li>Cliente,</li>
+                </ul>    
+            <br>
+            <p>Usuários não autenticados podem acessar a plataforma para visualizar informações sobre os produtos.</p>
+        <br>
+    </blockquote>
+<br>
+<h3>1.1 Níveis de acesso</h3>
+<br>
+    <blockquote>
+        <br>
+            <ul>
+                <li><b>Administrador:</b>     Tem acesso a todas as rotas e pode transformar um usuário comum em vendedor.</li>
+                <br>
+                <li><b>Vendedor:</b> Pode cadastrar novos produtos na plataforma, atualizar estoque de determinado produto, verificar os pedidos realizado dos produtos cadastrado por ele e também tem acesso a todas as rotas de um cliente</li>
+                <br>
+                <li><b>Cliente:</b> Pode atualizar o perfil para se tornar vendedor, adicionar produtos ao carrinho e finalizar a compra dos produtos. Também tem uma rota para visualizar todos os pedidos comprados.</li>
+            </ul>
+        <br>
+    </blockquote>
+<br>
+<h3>2. Endereço</h3>
+    <blockquote>
+        <br>
+            <p>O usuário tem a possibilidade de criar um endereço.</p>
+        <br>
+    </blockquote>
+<br>
+<h3>3. Produtos</h3>
+    <blockquote>
+        <br>
+            <ul>
+                <li>O usuário pode buscar os produtos por nome, categoria e id.</li>
+                <li>Tem verificação de estoque do itens, com indicação de indisponibilidade quando o item estiver com 0 unidades.</li>
+                <li>Quando um pedido é criado, a quantidade de estoque é subtraído.</li>
+                <li>Caso um usuário tenha um produto no carrinho e este produto esteja indisponível ao finalizar a compra, retornar um erro indicando que o produto não está mais disponível.</li>
+            </ul>
+        <br>
+    </blockquote>
+<br>
+<h3>4. Carrinho de Compra</h3>
+    <blockquote>
+        <br>
+            <ul>
+                <li>Os produtos selecionados pelo usuário são armazenados no carrinho antes de finalizar a compra.</li>
+                <li>No carrinho, contém uma lista dos produtos selecionados com os valores dos items</li>
+                <li>O pedido não é finalizado, caso o produto não tenha estoque ou caso ele esteja indisponivel.
+                <li>Se os produtos do carrinho forem de diferentes vendedores, é criado um pedido diferente para cada.</li>
+            </ul>
+        <br>
+    </blockquote>
+<br>
+<h3>5. Pedido</h3>
+    <blockquote>
+        <br>
+            <ul>
+                <li>Os pedidos tem um status de PEDIDO REALIZADO, EM ANDAMENTO ou ENTREGUE para acompanhamento do usuário.</li>
+                <li>Toda vez que o status do pedido for atualizado, é enviado um email ao vendedor.</li>
+                <li>O vendedor do produto conseguer atualizar o status do pedido.</li>
+                <li>Contém o horário em que o pedido foi feito</li>
+            </ul>
+        <br>
+    </blockquote>
+<br>
 <h2 align="center">Instalação e configuração</h2>
 <hr>
 <br>
@@ -74,3 +148,6 @@ python manage.py migrate
 ~~~bash
 python manage.py runserver
 ~~~
+
+<h2 align="center">Endpoints</h2>
+
