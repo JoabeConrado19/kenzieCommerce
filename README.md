@@ -899,10 +899,18 @@ Authorization: Bearer token
 </details>
 
 </details>
-
 <br>
 <hr>
 <br>
+
+<h2 align="center"> Acessar a documentação completa </h2>
+
+
+<p>Para visualizar todos os endpoints da aplicação, só acessar o link abaixo: </p>
+
+    https://kenziecommerce-production.up.railway.app/api/docs/swagger/
+
+
 
 
 
