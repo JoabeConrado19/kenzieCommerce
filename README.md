@@ -908,7 +908,7 @@ Authorization: Bearer token
 
 <p>Para visualizar todos os endpoints da aplicação, só acessar o link abaixo: </p>
 
-    https://kenziecommerce-production.up.railway.app/api/docs/swagger/
+    https://kenziecommerce-production.up.railway.app/api/docs/swagger-ui/
 
 
 
