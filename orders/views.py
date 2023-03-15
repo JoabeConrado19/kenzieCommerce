@@ -102,6 +102,9 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
         serializer = OrderConfirmed(data=request.data)
         serializer.is_valid(raise_exception=True)
         confirmed = serializer.data["confirmed_order"]
+        id_buyer = OrderedProduct.objects.get(order=order).buyer
+        buyer_mail = User.objects.get(id=id_buyer).email
+
         if order.status == "pedido_realizado" and order.user_id == request.user.id:
             if confirmed:
                 order.status = "Pedido em Andamento"
@@ -120,7 +123,7 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
                     "Atualização de status de pedido",
                     "Pedido em Andamento",
                     os.getenv("EMAIL_HOST_USER"),
-                    [user.email],
+                    [buyer_mail],
                 )
 
                 return Response({"message": "Pedido Cofirmado"})
@@ -136,7 +139,7 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
                 "Atualização de status de pedido",
                 "Pedido entregue",
                 os.getenv("EMAIL_HOST_USER"),
-                [user.email],
+                [buyer_mail],
             )
             return Response({"message": "Entrega confirmada"})
 
